@@ -51,19 +51,35 @@ def getLock(lock):
 def freeLock(lock):
     lock.release()
 
-def route(data,appConfig):
+from multiprocessing import Process, Queue
+
+def runJob(q, data, appConfig):
   #ppr.pprint("current working dir:%s"%os.getcwd())
   data = initialization(data,appConfig)
-  #ppr.pprint(data)
   try:
-    getLock(jobLock)
     setTimeStamp(data)
     taskRes = distributeTask(data["method"])(data)
-    freeLock(jobLock)
+    q.put([False, taskRes])
+  except Exception as e:
+    q.put([True, traceback.format_exc()])
+  finally:
     gc.collect()
     #ppr.pprint("memory usage: rss (%dM) and vms (%dM)"%(int(psutil.Process().memory_info().rss / 1024 **2),
     #                                                    int(psutil.Process().memory_info().vms / 1024 **2)))
-    return taskRes
+
+def route(data,appConfig):
+  q = Queue()
+  p = Process(target=runJob, args=(q, data, appConfig,))
+  try:
+    getLock(jobLock)
+    p.start()
+    has_error, data = q.get()
+    p.join()
+    freeLock(jobLock)
+    if has_error:
+        return 'ERROR @server: '+data
+    else:
+        return data
   except Exception as e:
     freeLock(jobLock)
     return 'ERROR @server: '+traceback.format_exc() # 'ERROR @server: {}, {}'.format(type(e),str(e))

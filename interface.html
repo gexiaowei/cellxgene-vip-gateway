@@ -1739,7 +1739,7 @@ function checkLoading(){
     var annoNum = 0;
     var columns = store.getState().annoMatrix.schema.annotations.obs.columns;
     for (var i=0;i<columns.length;i++) {
-      if (columns[i].type === "categorical" && columns[i].categories.length<2) continue;
+      if (columns[i].type === "categorical" && (typeof(columns[i].categories) === 'undefined' || columns[i].categories.length<2)) continue;
       annoNum ++;
     }
 
@@ -2125,6 +2125,7 @@ function init(){
     for(i=0;i<grps.length;i++){
       var one = grps[i];
       if (one.startsWith(">")) continue;
+      if (typeof(grpL[grps[i]].categories) === "undefined") continue;
       htmlCheck += '<label><input class="ABBRgrps" type="checkbox" value="'+grps[i]+'" onclick="ABBRlist(\'ABBR\')"/> '+grps[i]+' ('+grpL[grps[i]].categories.length+')</label>';
     }
     $('#ABBRgrp').html(htmlCheck);
@@ -2134,7 +2135,7 @@ function init(){
     for(i=0;i<grps.length;i++){
       var one = {}
       for(var j=0;j<grpL[grps[i]].categories.length;j++){
-        if (grpL[grps[i]].categories[j] != null) {
+        if (typeof(grpL[grps[i]].categories[j]) !== "undefined" && grpL[grps[i]].categories[j] !== null) {
           one[grpL[grps[i]].categories[j]] = grpL[grps[i]].categories[j].toString();
 		} else {
           one[grpL[grps[i]].categories[j]] = "NA";
