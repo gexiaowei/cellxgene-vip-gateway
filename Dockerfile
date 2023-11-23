@@ -1,7 +1,7 @@
 FROM debian:bullseye
 
 # ref: https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
-
+RUN sed -i 's#http://deb.debian.org#http://mirrors.tuna.tsinghua.edu.cn#g' /etc/apt/sources.list
 # Install all OS dependencies for notebook server that starts but lacks all
 # features (e.g., download as all possible file formats)
 # - tini is installed as a helpful container entrypoint that reaps zombie
@@ -35,8 +35,8 @@ ARG PYTHON_VERSION="3.8.12"
 # CONDA_MIRROR is a mirror prefix to speed up downloading
 # For example, people from mainland China could set it as
 # https://mirrors.tuna.tsinghua.edu.cn/github-release/conda-forge/miniforge/LatestRelease
-ARG CONDA_MIRROR=https://github.com/conda-forge/miniforge/releases/latest/download
-
+# ARG CONDA_MIRROR=https://github.com/conda-forge/miniforge/releases/latest/download
+ARG CONDA_MIRROR=https://mirrors.tuna.tsinghua.edu.cn/github-release/conda-forge/miniforge/LatestRelease
 # ---- Miniforge installer ----
 # Check https://github.com/conda-forge/miniforge/releases
 # Package Manager and Python implementation to use (https://github.com/conda-forge/miniforge)
@@ -98,3 +98,14 @@ RUN bash config.sh
 # install cellxgene Python dependencies if any
 RUN pip install -r /cellxgene_VIP/cellxgene/server/requirements.txt
 
+RUN R -q -e 'if(!require(ComplexHeatmap)) BiocManager::install("ComplexHeatmap")'
+
+COPY cellxgene-gateway /cellxgene_VIP/cellxgene-gateway
+
+
+RUN pip install -r /cellxgene_VIP/cellxgene-gateway/requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+ENV CELLXGENE_LOCATION=/opt/conda/bin/cellxgene
+ENV CELLXGENE_DATA=/data
+
+CMD ["python", "/cellxgene_VIP/cellxgene-gateway/gateway.py"]
