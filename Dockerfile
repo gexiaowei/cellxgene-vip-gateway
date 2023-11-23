@@ -82,6 +82,7 @@ RUN mamba install --quiet --yes \
 
 # :FIXME: mamba couldn't find fgsea dependency
 RUN R -q -e 'require(BiocManager); if(!require(fgsea)) BiocManager::install("fgsea")'
+RUN R -q -e 'require(BiocManager); if(!require(ComplexHeatmap)) BiocManager::install("ComplexHeatmap")'
 
 WORKDIR /cellxgene_VIP
 
@@ -98,10 +99,9 @@ RUN bash config.sh
 # install cellxgene Python dependencies if any
 RUN pip install -r /cellxgene_VIP/cellxgene/server/requirements.txt
 
-RUN R -q -e 'if(!require(ComplexHeatmap)) BiocManager::install("ComplexHeatmap")'
 
+# install cellxgene-gateway
 COPY cellxgene-gateway /cellxgene_VIP/cellxgene-gateway
-
 
 RUN pip install -r /cellxgene_VIP/cellxgene-gateway/requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 
