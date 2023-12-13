@@ -1,3 +1,7 @@
 [submodule "cellxgene"]
 	path = cellxgene
 	url = git@github.com:michaeleekk/cellxgene.git
+
+[submodule "cellxgene-gateway"]
+	path = cellxgene-gateway
+	url = git@github.com:Biomedical-Big-Data/cellxgene-gateway.git
