@@ -22,6 +22,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4.1.1
 
+      - name: Checkout Submodules
+        uses: actions/checkout@v4.1.1
+        with:
+          submodules: "true"
       - name: Get current date
         id: date
         run: echo "::set-output name=${{ vars.DOCKERHUB_TARGET }}:${{ github.ref_name }}"
